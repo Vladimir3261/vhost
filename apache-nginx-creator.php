@@ -1,5 +1,10 @@
 #!/usr/bin/php
 <?php
+/**
+ * Virtual host creator (http://php-server.xyz/)
+ * @link      https://github.com/Vladimir3261/vhost for the canonical source repository
+ * @copyright Copyright free-soft
+ */
 define('APACHE_PORT', 8080);
 define('NGINX_PORT', 80);
 function createApacheHost($host, $dir, $index) {
