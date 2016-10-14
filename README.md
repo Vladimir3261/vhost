@@ -25,6 +25,6 @@ For run this application:
 Tested on: 
 nginx  version: nginx/1.6.2
 apache Apache/2.4.10
-OS: Debian 8
+OS: Debian 8 Jessie
  
 
