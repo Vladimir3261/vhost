@@ -7,6 +7,12 @@
  */
 define('APACHE_PORT', 8080);
 define('NGINX_PORT', 80);
+/**
+ * Create virtual host configuration .conf for apache2 web server
+ * @param $host string
+ * @param $dir string
+ * @param $index string
+ */
 function createApacheHost($host, $dir, $index) {
     $hostStr = '
 <VirtualHost *:'.APACHE_PORT.'>
@@ -22,9 +28,18 @@ function createApacheHost($host, $dir, $index) {
  </VirtualHost>';
     $filename = '/etc/apache2/sites-available/'.$host.'.conf';
     touch($filename, 0775);
-    file_put_contents($filename, str_replace(['{PHP_HOSTNAME}', '{PHP_DIR}', '{PHP_INDEX}'], [$host, $dir, $index], $hostStr));
+    file_put_contents($filename, str_replace(
+        ['{PHP_HOSTNAME}', '{PHP_DIR}', '{PHP_INDEX}'],
+        [$host, $dir, $index],
+        $hostStr
+    ));
 }
 
+/**
+ * Creating nginx virtual host configuration file
+ * @param $host string
+ * @param $dir string
+ */
 function CreateNginxHost($host, $dir) {
     $hostStr = 'server {
         listen *:'.NGINX_PORT.'; ## listen for ipv4
@@ -47,9 +62,19 @@ function CreateNginxHost($host, $dir) {
 }';
     $filename = '/etc/nginx/sites-available/'.$host;
     touch($filename, 0775);
-    file_put_contents($filename, str_replace(['{PHP_HOSTNAME}', '{PHP_DIR}'], [$host, $dir], $hostStr));
+    file_put_contents($filename, str_replace(
+        ['{PHP_HOSTNAME}', '{PHP_DIR}'],
+        [$host, $dir], $hostStr
+    ));
 }
 
+/**
+ * Add record to /etc/hosts file. I'm sure not know why,
+ * but nginx can't start without this =). Actually i see this problem just on my local PC
+ * may be this require a specific nginx configuration
+ * @param $host string
+ * @return string string
+ */
 function updateHosts($host) {
     try
     {
@@ -62,7 +87,10 @@ function updateHosts($host) {
     }
 }
 
-
+/**
+ * Enable site and reload web servers
+ * @param $host string
+ */
 function reloadServices($host) {
     // Enable apache2 Host
     system("cd /etc/apache2/sites-available && a2ensite ".$host.".conf");
@@ -74,6 +102,13 @@ function reloadServices($host) {
     system("/etc/init.d/nginx restart");
 }
 
+/**
+ * This function just create working directory
+ * and index file for virtual host working demonstration
+ * @param $path string
+ * @param $index string
+ * @return string
+ */
 function createSite($path, $index) {
     if(!is_dir($path))
     {
@@ -123,6 +158,9 @@ $filesPath = readline('Put files path (/var/www/YOU_HOST_NAME): ');
 // index file like index.php
 $index = readline('Enter index file name (index.php): ');
 
+if(!$virtualHostName){
+    echo "\e[1m Host name is required......[\e[31mFAIL] \e[0m"."\r\n";exit(1);
+}
 if(!$filesPath)
     $filesPath = '/var/www/'.$virtualHostName;
 if(!$index)
@@ -147,9 +185,9 @@ echo "\e[1m Apache virtual hos creating... [\e[32mOK] \e[0m"."\r\n";
 /**
  * NGINX
  */
-sleep(1);
+usleep(500);
 echo "\e[1m Starting Nginx host creating on port ".NGINX_PORT."... \e[0m"."\r\n";
-sleep(1);
+usleep(500);
 try{
     CreateNginxHost($virtualHostName, $filesPath);
 }catch (Exception $e){
@@ -160,7 +198,7 @@ echo "\e[1m Nginx virtual  host creating ...... [OK] \e[0m"."\r\n";
 /**
  * Reload and enable services
  */
-sleep(1);
+usleep(5);
 echo "\e[1m Enabling services \e[0m"."\r\n";
 try{
     reloadServices($virtualHostName);
@@ -168,5 +206,5 @@ try{
     echo "\e[1m Reload services......[\e[31mFAIL] \e[0m"."\r\n";exit(1);
 }
 echo "\e[1m Reload services ...... [OK] \e[0m"."\r\n";
-sleep(1);
+usleep(500);
 echo createSite($filesPath, $index);
