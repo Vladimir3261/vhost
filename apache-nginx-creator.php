@@ -115,7 +115,7 @@ function createSite($path, $index) {
         try
         {
             // Create site directory
-            if(!system("mkdir -p ".$path)){
+            if(!system("sudo mkdir -p ".$path)){
                 throw new Exception('Cant create site working directory '.$path);
             }
             // Create index file
